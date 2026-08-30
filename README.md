@@ -11,6 +11,8 @@ taller-motos/
 ├── backend/          # REST API con Node.js, Express y Sequelize ORM
 ├── frontend/         # SPA con React, Vite y Axios
 └── README.md         # Documentación general
+```
+
 🛠️ Stack Tecnológico
 Backend: Node.js, Express.js, Sequelize ORM, MySQL, CORS, Dotenv.
 
@@ -26,66 +28,80 @@ Servidor MySQL ejecutándose en local (Puerto por defecto: 3306)
 Git
 
 🚀 Instalación y Configuración
+
 1. Clonar el Repositorio
-Bash
+   Bash
+
+```
 git clone <URL_DEL_REPOSITORIO>
 cd taller-motos
+```
+
 2. Configuración del Backend
-Entrar a la carpeta backend e instalar dependencias:
+   Entrar a la carpeta backend e instalar dependencias:
 
 Bash
+
+```
 cd backend
 npm install
+```
+
 Crear la base de datos en MySQL (Workbench, DBeaver o CLI):
 
 SQL
-```
 
+```
 CREATE DATABASE taller_motos_db;
 
 ```
+
 Configurar las variables de entorno:
 Crea un archivo .env dentro de la carpeta backend/:
 
 Fragmento de código
-```
 
+```
 PORT=4000
 DB_HOST=localhost
 DB_USER=root
 DB_PASS=tu_contraseña_mysql
 DB_NAME=taller_motos_db
 DB_PORT=3306
-
 ```
+
 Iniciar el servidor backend en modo desarrollo:
 
 Bash
+
+```
+npm run dev
 ```
 
-npm run dev
 El servidor quedará ejecutándose en http://localhost:4000
 
-```
 3. Configuración del Frontend
-Abrir una nueva terminal, entrar a la carpeta frontend e instalar dependencias:
+   Abrir una nueva terminal, entrar a la carpeta frontend e instalar dependencias:
 
 Bash
+
 ```
 
 cd frontend
 npm install
 
 ```
+
 Iniciar la aplicación cliente:
 
 Bash
+
 ```
 
 npm run dev
-La aplicación estará disponible en http://localhost:5173
-
 ```
+
+La aplicación estará disponible en http://localhost:5173
 
 📌 Reglas de Negocio Implementadas
 Máquina de Estados Estricta: Las órdenes de trabajo siguen un flujo controlado:
@@ -102,4 +118,7 @@ Búsqueda de vehículos por placa única.
 Restricción de teléfono a exactamente 10 dígitos numéricos en tiempo real.
 
 Validación de formato de correo electrónico (@ y dominio).
+
+```
+
 ```
