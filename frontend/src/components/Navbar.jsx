@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export const Navbar = () => {
   return (
     <nav style={{ background: "#1e293b", padding: "1rem 2rem", color: "#fff" }}>

@@ -8,22 +8,20 @@ const STATUS_COLORS = {
 };
 
 export const StatusBadge = ({ status }) => {
-     color style = STATUS_COLORS[status] || { bg: '#f3f4f6', text: '#374151' }
-return (
+  const style = STATUS_COLORS[status] || { bg: "#f3f4f6", text: "#374151" };
+  return (
     <span
       style={{
         backgroundColor: style.bg,
         color: style.text,
-        padding: '4px 12px',
-        borderRadius: '9999px',
-        fontSize: '12px',
-        fontWeight: 'bold',
-        display: 'inline-block',
+        padding: "4px 12px",
+        borderRadius: "9999px",
+        fontSize: "12px",
+        fontWeight: "bold",
+        display: "inline-block",
       }}
     >
       {status}
     </span>
   );
 };
-
-    
