@@ -1,10 +1,12 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const sequelize = require("./config/database");
-require("./models"); // Carga los modelos y sus relaciones
+const { User } = require("./models");
 
+const authRoutes = require("./routes/authRoutes");
 const clientRoutes = require("./routes/clientRoutes");
 const bikeRoutes = require("./routes/bikeRoutes");
 const workOrderRoutes = require("./routes/workOrderRoutes");
@@ -18,6 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas de la API
+app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/bikes", bikeRoutes);
 app.use("/api/work-orders", workOrderRoutes);
@@ -33,6 +36,20 @@ const startServer = async () => {
 
     await sequelize.sync({ alter: true });
     console.log("Tablas e índices sincronizados correctamente.");
+
+    //Creacion de usuario Administrador, por si no existe ninguno
+    const adminExists = await User.findOne({ where: { role: "ADMIN" } });
+    if (!adminExists) {
+      const password_hash = await bcrypt.hash("admin123", 10);
+      await User.create({
+        name: "Administrador Taller",
+        email: "admin@taller.com",
+        password_hash,
+        role: "ADMIN",
+        active: true,
+      });
+      console.log("Usuario administrador creado con éxito.");
+    }
 
     app.listen(PORT, () => {
       console.log(`Servidor ejecutándose en http://localhost:${PORT}`);

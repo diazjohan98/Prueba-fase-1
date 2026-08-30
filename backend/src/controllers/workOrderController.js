@@ -1,8 +1,14 @@
-const { WorkOrder, OrderItem, Bike, Client } = require("../models");
-const sequelize = require("../config/database"); // Importar la instancia directamente desde la configuración
+const {
+  WorkOrder,
+  OrderItem,
+  Bike,
+  Client,
+  WorkOrderStatusHistory,
+  User,
+} = require("../models");
+const sequelize = require("../config/database");
 const { validateStatusTransition } = require("../utils/statusValidator");
 
-// Helper para recalcular el total de la orden
 const recalculateOrderTotal = async (workOrderId, transaction = null) => {
   const items = await OrderItem.findAll({
     where: { work_order_id: workOrderId },
@@ -21,7 +27,6 @@ const recalculateOrderTotal = async (workOrderId, transaction = null) => {
   return total;
 };
 
-// Crear Orden de Trabajo
 exports.createWorkOrder = async (req, res, next) => {
   try {
     const { motoId, faultDescription } = req.body;
@@ -50,7 +55,6 @@ exports.createWorkOrder = async (req, res, next) => {
   }
 };
 
-// Obtener Órdenes con filtros y paginación
 exports.getWorkOrders = async (req, res, next) => {
   try {
     const { status, plate, page = 1, pageSize = 10 } = req.query;
@@ -98,7 +102,6 @@ exports.getWorkOrders = async (req, res, next) => {
   }
 };
 
-// Obtener detalle de una Orden por ID
 exports.getWorkOrderById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -127,38 +130,71 @@ exports.getWorkOrderById = async (req, res, next) => {
   }
 };
 
-// Cambiar estado de la orden (con validación de máquina de estados)
 exports.updateStatus = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { status: newStatus } = req.body;
+    const { toStatus, note } = req.body;
 
-    if (!newStatus) {
-      return res.status(400).json({ error: "El campo status es requerido." });
+    if (!toStatus) {
+      await t.rollback();
+      return res.status(400).json({ error: "El campo toStatus es requerido." });
     }
 
-    const order = await WorkOrder.findByPk(id);
+    const order = await WorkOrder.findByPk(id, { transaction: t });
     if (!order) {
+      await t.rollback();
       return res.status(404).json({ error: "Orden de trabajo no encontrada." });
     }
 
-    // Validar transición según la regla de negocio
-    validateStatusTransition(order.status, newStatus);
+    validateStatusTransition(order.status, toStatus, req.user.role);
 
-    order.status = newStatus;
-    await order.save();
+    const fromStatus = order.status;
+    order.status = toStatus;
+    await order.save({ transaction: t });
 
-    return res.json(order);
+    await WorkOrderStatusHistory.create(
+      {
+        work_order_id: id,
+        from_status: fromStatus,
+        to_status: toStatus,
+        note: note || `Transición a ${toStatus}`,
+      },
+      { transaction: t },
+    );
+
+    await t.commit();
+    res.json(order);
+  } catch (error) {
+    await t.rollback();
+    next(error);
+  }
+};
+
+exports.getOrderHistory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const history = await WorkOrderStatusHistory.findAll({
+      where: { work_order_id: id },
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "email", "role"],
+        },
+      ],
+    });
+    res.json(history);
   } catch (error) {
     next(error);
   }
 };
 
-// Agregar un ítem a la orden (Usando Transacción SQL)
 exports.addItem = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
-    const { id } = req.params; // work_order_id
+    const { id } = req.params;
     const { type, description, count, unitValue } = req.body;
 
     if (
@@ -212,7 +248,6 @@ exports.addItem = async (req, res, next) => {
   }
 };
 
-// Eliminar un ítem de la orden (Usando Transacción SQL)
 exports.deleteItem = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
