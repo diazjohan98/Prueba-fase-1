@@ -1,4 +1,4 @@
-const { DataTypes } = requir("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
 const Bike = sequelize.define(

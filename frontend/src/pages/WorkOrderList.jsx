@@ -3,7 +3,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import { Link } from "react-router-dom";
 import { api } from "../api/axios";
 
-export const WorkOrderList = () => {
+export const WorkOrdersList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

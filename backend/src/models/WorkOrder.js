@@ -10,7 +10,7 @@ const WORK_ORDER_STATUSES = [
   "CANCELADA",
 ];
 
-const workOrder = sequelize.define(
+const WorkOrder = sequelize.define(
   "WorkOrder",
   {
     id: {
@@ -27,8 +27,12 @@ const workOrder = sequelize.define(
       },
     },
     entryDate: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+    },
+    faultDescription: {
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     status: {
       type: DataTypes.ENUM(...WORK_ORDER_STATUSES),

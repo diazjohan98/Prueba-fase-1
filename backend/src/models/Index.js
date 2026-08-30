@@ -1,18 +1,18 @@
 const Client = require("./Client");
 const Bike = require("./Bike");
-const { workOrder, WORK_ORDER_STATUSES, WorkOrder } = require("./WorkOrder");
-const OrderITem = require("./OrderItem");
+const { WorkOrder, WORK_ORDER_STATUSES } = require("./WorkOrder");
+const OrderItem = require("./OrderItem");
 
-// Client -> motos
+// Cliente -> Motos
 Client.hasMany(Bike, { foreignKey: "clientId", as: "bikes" });
 Bike.belongsTo(Client, { foreignKey: "clientId", as: "client" });
 
-// moto -> ordenes
+// Moto -> Ordenes
 Bike.hasMany(WorkOrder, { foreignKey: "motoId", as: "workOrders" });
 WorkOrder.belongsTo(Bike, { foreignKey: "motoId", as: "bike" });
 
-//Order -> ITems
-WorkOrder.hasMany(OrderITem, {
+// Orden -> Items
+WorkOrder.hasMany(OrderItem, {
   foreignKey: "work_order_id",
   as: "items",
   onDelete: "CASCADE",

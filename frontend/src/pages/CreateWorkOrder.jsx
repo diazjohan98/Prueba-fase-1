@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getBikeByPlate,
@@ -42,12 +42,12 @@ export const CreateWorkOrder = () => {
         setSelectedBike(bikes[0]);
       } else {
         setError(
-          "No se encontró ninguna moto con esa placa. Puedes registrarla abajo.",
+          "No se encontró ninguna moto registrada con esa placa. Puedes registrarla a continuación.",
         );
         setShowFastRegister(true);
       }
     } catch (err) {
-      setError("Error al consultar la placa.");
+      setError("Error al consultar la base de datos.");
     } finally {
       setLoading(false);
     }
@@ -55,21 +55,44 @@ export const CreateWorkOrder = () => {
 
   const handleFastRegister = async (e) => {
     e.preventDefault();
+
+    const phoneDigitsOnly = clientData.phone.trim();
+    if (!/^\d{10}$/.test(phoneDigitsOnly)) {
+      setError(
+        "El número de teléfono debe contener exactamente 10 dígitos numéricos.",
+      );
+      return;
+    }
+
+    if (
+      clientData.email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientData.email.trim())
+    ) {
+      setError(
+        "Por favor, ingrese un correo electrónico válido (ejemplo@dominio.com).",
+      );
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
       const newBikeWithClient = await registerClientAndBike({
-        clientData,
+        clientData: {
+          ...clientData,
+          phone: phoneDigitsOnly,
+          email: clientData.email.trim(),
+        },
         bikeData,
         placa: plateSearch,
       });
 
       setSelectedBike(newBikeWithClient);
       setShowFastRegister(false);
-      setMessage("¡Cliente y Moto registrados con éxito!");
+      setMessage("¡Cliente y motocicleta vinculados exitosamente!");
     } catch (err) {
-      setError(err.response?.data?.error || "Error en el registro rápido.");
+      setError(err.response?.data?.error || "Error en el registro de datos.");
     } finally {
       setLoading(false);
     }
@@ -88,105 +111,165 @@ export const CreateWorkOrder = () => {
       });
       navigate(`/orden/${newOrder.id}`);
     } catch (err) {
-      setError(err.response?.data?.error || "Error al crear la orden.");
+      setError(err.response?.data?.error || "Error al generar la orden.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
-      <h1>Crear Nueva Orden de Trabajo</h1>
-
-      {error && (
+    <div
+      style={{ maxWidth: "800px", margin: "2.5rem auto", padding: "0 1.5rem" }}
+    >
+      <div style={{ marginBottom: "2rem" }}>
+        <h1 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#0f172a" }}>
+          Crear Orden de Trabajo
+        </h1>
         <p
           style={{
-            color: "red",
-            background: "#fee2e2",
-            padding: "10px",
-            borderRadius: "4px",
+            color: "#64748b",
+            fontSize: "0.95rem",
+            marginTop: "0.25rem",
+          }}
+        >
+          Busca el vehículo o regístralo para iniciar el flujo de mantenimiento.
+        </p>
+      </div>
+
+      {error && (
+        <div
+          style={{
+            backgroundColor: "#fef2f2",
+            border: "1px solid #fecaca",
+            color: "#991b1b",
+            padding: "0.875rem 1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            fontSize: "0.9rem",
           }}
         >
           {error}
-        </p>
+        </div>
       )}
+
       {message && (
-        <p
+        <div
           style={{
-            color: "green",
-            background: "#dcfce7",
-            padding: "10px",
-            borderRadius: "4px",
+            backgroundColor: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            color: "#166534",
+            padding: "0.875rem 1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            fontSize: "0.9rem",
           }}
         >
           {message}
-        </p>
+        </div>
       )}
 
       <div
         style={{
-          background: "#f8fafc",
-          padding: "1.5rem",
-          borderRadius: "8px",
+          backgroundColor: "#ffffff",
+          padding: "1.75rem",
+          borderRadius: "12px",
+          boxShadow: "var(--shadow-md)",
+          border: "1px solid var(--border-color)",
           marginBottom: "1.5rem",
         }}
       >
-        <h3>1. Buscar Moto por Placa</h3>
+        <h3
+          style={{
+            fontSize: "1.05rem",
+            fontWeight: 600,
+            marginBottom: "1rem",
+            color: "#1e293b",
+          }}
+        >
+          1. Consultar Placa del Vehículo
+        </h3>
         <form
           onSubmit={handleSearchBike}
-          style={{ display: "flex", gap: "1rem" }}
+          style={{ display: "flex", gap: "0.75rem" }}
         >
           <input
             type="text"
             placeholder="Ingrese Placa (ej: ABC123)"
             value={plateSearch}
-            onChange={(e) => setPlateSearch(e.target.value)}
-            style={{ padding: "8px", flex: 1 }}
+            onChange={(e) => setPlateSearch(e.target.value.toUpperCase())}
+            style={{
+              flex: 1,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              fontWeight: 600,
+            }}
             required
           />
           <button
             type="submit"
             disabled={loading}
             style={{
-              padding: "8px 16px",
-              background: "#2563eb",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              padding: "0.625rem 1.25rem",
+              width: "auto",
             }}
           >
-            {loading ? "Buscando..." : "Buscar Placa"}
+            {loading ? "Buscando..." : "Buscar"}
           </button>
         </form>
       </div>
 
+      {/* Registro Rápido */}
       {showFastRegister && (
         <form
           onSubmit={handleFastRegister}
           style={{
-            background: "#fff3cd",
-            padding: "1.5rem",
-            borderRadius: "8px",
+            backgroundColor: "#ffffff",
+            padding: "1.75rem",
+            borderRadius: "12px",
+            boxShadow: "var(--shadow-md)",
+            border: "1px solid #fde68a",
             marginBottom: "1.5rem",
           }}
         >
-          <h3>Registro Rápido de Cliente y Moto</h3>
-          <p>
-            Placa a registrar: <strong>{plateSearch.toUpperCase()}</strong>
-          </p>
+          <div
+            style={{
+              borderBottom: "1px solid #fef3c7",
+              paddingBottom: "0.75rem",
+              marginBottom: "1.25rem",
+            }}
+          >
+            <h3
+              style={{ fontSize: "1.05rem", fontWeight: 600, color: "#92400e" }}
+            >
+              2. Registro Rápido
+            </h3>
+            <p style={{ fontSize: "0.85rem", color: "#b45309" }}>
+              Placa a registrar: <strong>{plateSearch.toUpperCase()}</strong>
+            </p>
+          </div>
 
+          <h4
+            style={{
+              fontSize: "0.9rem",
+              color: "#475569",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Información del Cliente
+          </h4>
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
-              gap: "1rem",
-              marginBottom: "1rem",
+              gap: "0.75rem",
+              marginBottom: "1.25rem",
             }}
           >
             <input
               type="text"
-              placeholder="Nombre completo del cliente"
+              placeholder="Nombre Completo"
               value={clientData.name}
               onChange={(e) =>
                 setClientData({ ...clientData, name: e.target.value })
@@ -204,20 +287,30 @@ export const CreateWorkOrder = () => {
             />
             <input
               type="email"
-              placeholder="Correo electrónico (opcional)"
+              placeholder="Correo Electrónico (opcional)"
               value={clientData.email}
               onChange={(e) =>
                 setClientData({ ...clientData, email: e.target.value })
               }
+              style={{ gridColumn: "span 2" }}
             />
           </div>
 
+          <h4
+            style={{
+              fontSize: "0.9rem",
+              color: "#475569",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Información de la Moto
+          </h4>
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "1rem",
-              marginBottom: "1rem",
+              gap: "0.75rem",
+              marginBottom: "1.5rem",
             }}
           >
             <input
@@ -240,7 +333,7 @@ export const CreateWorkOrder = () => {
             />
             <input
               type="text"
-              placeholder="Cilindraje (opcional)"
+              placeholder="Cilindraje"
               value={bikeData.cylinder}
               onChange={(e) =>
                 setBikeData({ ...bikeData, cylinder: e.target.value })
@@ -252,15 +345,13 @@ export const CreateWorkOrder = () => {
             type="submit"
             disabled={loading}
             style={{
-              padding: "8px 16px",
-              background: "#16a34a",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
+              backgroundColor: "#16a34a",
+              color: "#ffffff",
+              padding: "0.75rem 1.5rem",
+              width: "100%",
             }}
           >
-            {loading ? "Guardando..." : "Guardar Moto y Cliente"}
+            {loading ? "Guardando..." : "Guardar y Seleccionar"}
           </button>
         </form>
       )}
@@ -269,42 +360,67 @@ export const CreateWorkOrder = () => {
         <form
           onSubmit={handleCreateOrder}
           style={{
-            background: "#f0fdf4",
-            padding: "1.5rem",
-            borderRadius: "8px",
+            backgroundColor: "#ffffff",
+            padding: "1.75rem",
+            borderRadius: "12px",
+            boxShadow: "var(--shadow-md)",
+            border: "1px solid #bbf7d0",
           }}
         >
-          <h3>2. Confirmación de Moto y Falla</h3>
-          <p>
-            <strong>Placa:</strong> {selectedBike.placa} - {selectedBike.brand}{" "}
-            {selectedBike.model}
-          </p>
-          <p>
-            <strong>Cliente:</strong> {selectedBike.client?.name} (
-            {selectedBike.client?.phone})
-          </p>
+          <h3
+            style={{
+              fontSize: "1.05rem",
+              fontWeight: 600,
+              marginBottom: "1rem",
+              color: "#166534",
+            }}
+          >
+            2. Detalle del Mantenimiento
+          </h3>
 
-          <div style={{ marginTop: "1rem" }}>
+          <div
+            style={{
+              backgroundColor: "#f0fdf4",
+              padding: "1rem",
+              borderRadius: "8px",
+              marginBottom: "1.25rem",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <p style={{ fontSize: "0.85rem", color: "#15803d" }}>Vehículo:</p>
+              <p style={{ fontWeight: 700, color: "#166534" }}>
+                {selectedBike.placa} ({selectedBike.brand} {selectedBike.model})
+              </p>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ fontSize: "0.85rem", color: "#15803d" }}>
+                Propietario:
+              </p>
+              <p style={{ fontWeight: 600, color: "#166534" }}>
+                {selectedBike.client?.name}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: "1.25rem" }}>
             <label
               style={{
                 display: "block",
                 marginBottom: "0.5rem",
-                fontWeight: "bold",
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                color: "#334155",
               }}
             >
-              Descripción del Problema / Falla:
+              Descripción del problema / Diagnóstico preliminar:
             </label>
             <textarea
               rows="4"
               value={faultDescription}
               onChange={(e) => setFaultDescription(e.target.value)}
-              placeholder="Ej: La moto se apaga al acelerar y requiere cambio de aceite..."
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-              }}
+              placeholder="Escriba aquí los detalles reportados por el cliente o las fallas detectadas..."
               required
             />
           </div>
@@ -313,17 +429,15 @@ export const CreateWorkOrder = () => {
             type="submit"
             disabled={loading}
             style={{
-              marginTop: "1rem",
-              padding: "10px 20px",
-              background: "#2563eb",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              fontWeight: "bold",
-              cursor: "pointer",
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              padding: "0.75rem 1.5rem",
+              width: "100%",
+              fontWeight: 600,
+              fontSize: "1rem",
             }}
           >
-            {loading ? "Creando Orden..." : "Generar Orden de Trabajo"}
+            {loading ? "Generando..." : "Generar Orden de Trabajo"}
           </button>
         </form>
       )}

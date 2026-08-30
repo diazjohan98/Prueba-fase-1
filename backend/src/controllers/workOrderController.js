@@ -1,4 +1,5 @@
-const { WorkOrder, OrderItem, Bike, Client, sequelize } = require("../models");
+const { WorkOrder, OrderItem, Bike, Client } = require("../models");
+const sequelize = require("../config/database"); // Importar la instancia directamente desde la configuración
 const { validateStatusTransition } = require("../utils/statusValidator");
 
 // Helper para recalcular el total de la orden
