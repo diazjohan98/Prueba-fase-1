@@ -82,7 +82,7 @@ export const CreateWorkOrder = () => {
         clientData: {
           ...clientData,
           phone: phoneDigitsOnly,
-          email: clientData.email.trim(),
+          email: clientData.email ? clientData.email.trim() : null,
         },
         bikeData,
         placa: plateSearch,
@@ -220,7 +220,6 @@ export const CreateWorkOrder = () => {
         </form>
       </div>
 
-      {/* Registro Rápido */}
       {showFastRegister && (
         <form
           onSubmit={handleFastRegister}
