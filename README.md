@@ -119,6 +119,12 @@ Restricción de teléfono a exactamente 10 dígitos numéricos en tiempo real.
 
 Validación de formato de correo electrónico (@ y dominio).
 
-```
+🧑‍💻 Credenciales de Prueba (RBAC)
+El sistema cuenta con protección de rutas por roles (Fase 2). Utiliza estas credenciales generadas automáticamente para ingresar al sistema:
 
+```
+| Rol | Correo Electrónico | Contraseña | Permisos |
+| :--- | :--- | :--- | :--- |
+| **ADMIN** | `admin@taller.com` | `admin123` | Control total. Transiciones a ENTREGADA/CANCELADA y borrado de ítems. |
+| **MECANICO** | *(Crear desde BD o registro)* | *(N/A)* | Solo transiciones operativas. No puede cancelar, entregar ni borrar ítems. |
 ```
