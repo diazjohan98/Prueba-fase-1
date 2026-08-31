@@ -1,17 +1,16 @@
+import { useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 export const Navbar = () => {
   const location = useLocation();
+  const { user, logout } = useContext(AuthContext);
 
-  const isActive = (path) => location.pathname === path;
+  if (!user) return null;
 
   return (
     <header
-      style={{
-        backgroundColor: "#0f172a",
-        borderBottom: "1px solid #1e293b",
-        sticky: "top",
-      }}
+      style={{ backgroundColor: "#0f172a", borderBottom: "1px solid #1e293b" }}
     >
       <div
         style={{
@@ -52,13 +51,10 @@ export const Navbar = () => {
           <Link
             to="/"
             style={{
-              color: isActive("/") ? "#ffffff" : "#94a3b8",
+              color: "#ffffff",
               textDecoration: "none",
-              fontWeight: 500,
               fontSize: "0.9rem",
-              padding: "0.5rem 0.75rem",
-              borderRadius: "6px",
-              backgroundColor: isActive("/") ? "#1e293b" : "transparent",
+              fontWeight: 500,
             }}
           >
             Órdenes
@@ -73,11 +69,39 @@ export const Navbar = () => {
               fontSize: "0.875rem",
               padding: "0.5rem 1rem",
               borderRadius: "6px",
-              boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)",
             }}
           >
             + Nueva Orden
           </Link>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              marginLeft: "1rem",
+              borderLeft: "1px solid #334155",
+              paddingLeft: "1rem",
+            }}
+          >
+            <div style={{ color: "#ffffff", fontSize: "0.85rem" }}>
+              <div style={{ fontWeight: 600 }}>{user.name}</div>
+              <div style={{ color: "#94a3b8", fontSize: "0.75rem" }}>
+                {user.role}
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              style={{
+                backgroundColor: "#dc2626",
+                color: "#ffffff",
+                padding: "0.4rem 0.75rem",
+                fontSize: "0.8rem",
+              }}
+            >
+              Salir
+            </button>
+          </div>
         </nav>
       </div>
     </header>

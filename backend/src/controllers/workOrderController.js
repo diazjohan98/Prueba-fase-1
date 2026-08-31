@@ -138,7 +138,9 @@ exports.updateStatus = async (req, res, next) => {
 
     if (!toStatus) {
       await t.rollback();
-      return res.status(400).json({ error: "El campo toStatus es requerido." });
+      return res
+        .status(400)
+        .json({ error: "El campo toStatus es obligatorio." });
     }
 
     const order = await WorkOrder.findByPk(id, { transaction: t });
@@ -147,7 +149,9 @@ exports.updateStatus = async (req, res, next) => {
       return res.status(404).json({ error: "Orden de trabajo no encontrada." });
     }
 
-    validateStatusTransition(order.status, toStatus, req.user.role);
+    const userRole = req.user?.role;
+
+    validateStatusTransition(order.status, toStatus, userRole);
 
     const fromStatus = order.status;
     order.status = toStatus;
@@ -158,7 +162,8 @@ exports.updateStatus = async (req, res, next) => {
         work_order_id: id,
         from_status: fromStatus,
         to_status: toStatus,
-        note: note || `Transición a ${toStatus}`,
+        note: note || `Estado actualizado a ${toStatus}`,
+        changed_by_user_id: req.user.id,
       },
       { transaction: t },
     );

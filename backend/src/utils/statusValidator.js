@@ -7,7 +7,7 @@ const VALID_TRANSITIONS = {
   CANCELADA: [],
 };
 
-const validateStatusTransition = (currentStatus, newStatus) => {
+const validateStatusTransition = (currentStatus, newStatus, userRole) => {
   if (currentStatus === newStatus) {
     const error = new Error(
       `Transición redundante: la orden ya está en '${currentStatus}'.`,
@@ -15,6 +15,7 @@ const validateStatusTransition = (currentStatus, newStatus) => {
     error.statusCode = 400;
     throw error;
   }
+
   if (currentStatus === "ENTREGADA") {
     const error = new Error(
       "La orden fue ENTREGADA. No se permiten cambios de estado posteriores.",
@@ -32,16 +33,18 @@ const validateStatusTransition = (currentStatus, newStatus) => {
     throw error;
   }
 
+  // Restricción por Rol: Si es MECANICO, solo puede pasar a DIAGNOSTICO, EN_PROCESO o LISTA
   if (userRole === "MECANICO") {
     const mecanicoAllowed = ["DIAGNOSTICO", "EN_PROCESO", "LISTA"];
     if (!mecanicoAllowed.includes(newStatus)) {
       const error = new Error(
-        `El rol MECANICO no tiene permisos para pasar la orden a '${newStatus}'.`,
+        `El rol MECANICO no tiene permisos para cambiar la orden a '${newStatus}'.`,
       );
       error.statusCode = 403;
       throw error;
     }
   }
+
   return true;
 };
 

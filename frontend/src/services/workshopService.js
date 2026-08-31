@@ -38,11 +38,13 @@ export const getWorkOrderById = async (id) => {
   return response.data;
 };
 
-export const updateOrderStatus = async (id, status) => {
-  const response = await api.patch(`/work-orders/${id}/status`, { status });
+export const updateWorkOrderStatus = async (orderId, toStatus, note = "") => {
+  const response = await api.patch(`/work-orders/${orderId}/status`, {
+    toStatus,
+    note,
+  });
   return response.data;
 };
-
 export const addOrderItem = async (id, itemData) => {
   const response = await api.post(`/work-orders/${id}/items`, itemData);
   return response.data;

@@ -51,6 +51,21 @@ const startServer = async () => {
       console.log("Usuario administrador creado con éxito.");
     }
 
+    const mecanicoExists = await User.findOne({ where: { role: "MECANICO" } });
+    if (!mecanicoExists) {
+      const password_hash = await bcrypt.hash("mecanico123", 10);
+      await User.create({
+        name: "Carlos Mecánico",
+        email: "mecanico@taller.com",
+        password_hash,
+        role: "MECANICO",
+        active: true,
+      });
+      console.log(
+        "Usuario MECANICO creado por defecto: mecanico@taller.com / mecanico123",
+      );
+    }
+
     app.listen(PORT, () => {
       console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
     });
